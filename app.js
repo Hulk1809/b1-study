@@ -184,7 +184,7 @@ function enhanceExamText(container) {
   container.textContent = '';
   const help = document.createElement('p');
   help.className = 'speech-help';
-  help.textContent = 'Đọc mẫu bằng giọng thiết bị (không phải audio đề thi). Dịch mở Google Translate ở tab mới; nội dung câu được gửi sang Google khi bạn bấm. Giọng đọc tùy trình duyệt/thiết bị.';
+  help.textContent = 'Đọc mẫu bằng giọng thiết bị (không phải audio đề thi). Bấm Dịch để hiện/ẩn tiếng Việt ngay dưới câu. Bản dịch hỗ trợ học, không phải đáp án hay bản dịch chính thức. Giọng đọc tùy thiết bị.';
   container.before(help);
   const stop = document.createElement('button');
   stop.className = 'button secondary speech-stop'; stop.textContent = 'Dừng đọc'; stop.type = 'button';
@@ -210,11 +210,18 @@ function enhanceExamText(container) {
         utterance.onerror = e => { if (!['canceled', 'interrupted'].includes(e.error)) toast('Không phát được giọng đọc. Kiểm tra âm lượng hoặc thử Chrome/Edge.'); };
         window.speechSynthesis.speak(utterance);
       };
-      const translate = document.createElement('a'); translate.textContent = 'Dịch';
-      translate.href = 'https://translate.google.com/?sl=en&tl=vi&text=' + encodeURIComponent(line) + '&op=translate';
-      translate.target = '_blank'; translate.rel = 'noopener noreferrer';
+      const translate = document.createElement('button'); translate.type = 'button'; translate.textContent = 'Dịch';
       translate.setAttribute('aria-label', 'Dịch sang tiếng Việt: ' + line);
+      translate.setAttribute('aria-expanded', 'false');
+      const meaning = document.createElement('div'); meaning.className = 'sentence-translation'; meaning.lang = 'vi'; meaning.hidden = true;
+      meaning.textContent = window.COURSE.translations?.[line] || 'Chưa có bản dịch cho câu này.';
+      translate.onclick = () => {
+        meaning.hidden = !meaning.hidden;
+        translate.setAttribute('aria-expanded', String(!meaning.hidden));
+        translate.textContent = meaning.hidden ? 'Dịch' : 'Ẩn dịch';
+      };
       controls.append(speak, translate); row.append(controls);
+      row.append(meaning);
     }
     container.append(row);
   }
