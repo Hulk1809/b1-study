@@ -10,6 +10,7 @@ let timer;
 let currentVideo = items.find((i) => i.name.includes('NHẬP KHÓA')).id;
 let questionIndex = 0;
 let topicIndex = 0;
+let letterIndex = 0;
 let photoIndex = 0;
 let showKey = false;
 let practiceTest = 1;
@@ -43,6 +44,11 @@ function videoPage() {
 function writingPage() {
   const q = questions[questionIndex];
   return heading('Luyện viết, từng câu một.', 'Đề và đáp án trích nguyên tài liệu khóa học. Tự đối chiếu, không chấm sai vì khác cách diễn đạt.') + `<div class="toolbar"><label for="question-select">Chọn câu</label><select id="question-select">${questions.map((i, n) => `<option value="${n}" ${n === questionIndex ? 'selected' : ''}>Câu ${i.number}${state.done['write-' + i.number] ? ' · Đã ôn' : ''}</option>`).join('')}</select><a class="button secondary" href="#library?skill=thư">10 bài viết thư ↗</a></div><div class="split"><section class="practice"><div class="eyebrow">WRITING PART 1 · CÂU ${q.number} / 30</div><p class="question">${escapeHTML(q.prompt)}</p><p class="starter">Bắt đầu bằng: <strong>${escapeHTML(q.starter)}</strong></p><label for="writing-answer">Viết lại cả câu, giữ nguyên nghĩa</label><textarea id="writing-answer" data-answer="${q.number}" lang="en" spellcheck="true" placeholder="${escapeHTML(q.starter)}…">${escapeHTML(state.answers[q.number] || '')}</textarea><details><summary>Xem đáp án trong tài liệu</summary><ul>${q.answers.map((a) => `<li lang="en">${escapeHTML(a)}</li>`).join('')}</ul><p class="fine-print">Giữ nguyên đáp án nguồn, không tự khẳng định mọi phương án đều chuẩn ngữ pháp. Nếu nghi ngờ, đối chiếu video “30 CÂU VIẾT”.</p>${link('1xtUbJm04A_Fk8iGroaq93DqjIyukVI5y')}</details><label class="complete"><input type="checkbox" data-done="write-${q.number}" ${state.done['write-' + q.number] ? 'checked' : ''}> Tôi đã ôn và đối chiếu câu này</label><div class="actions"><button class="button secondary" data-question="${questionIndex - 1}" ${questionIndex === 0 ? 'disabled' : ''}>← Câu trước</button><button class="button" data-question="${questionIndex + 1}" ${questionIndex === 29 ? 'disabled' : ''}>Câu tiếp →</button></div></section><aside><section class="panel"><h3>Viết để hiểu, không chỉ nhớ đáp án</h3><p>Đọc câu gốc, xác định cấu trúc, viết lại rồi mới mở đáp án. Các cách viết đúng khác vẫn có thể được chấp nhận.</p><p>Ảnh dặn dò nêu: bài thi có 5 câu; 3 câu giống bộ ôn, 2 câu thay đổi nhưng cùng cấu trúc.</p>${link('1nALBDlkgPjg7pBCwP4VnF8wuW8NC_iUP', 'Xem video 30 câu viết ↗')}</section><section class="panel"><h3>Viết thư · 120–150 từ</h3><label for="letter">Bản nháp của bạn</label><textarea id="letter" data-note="letter" lang="en" placeholder="Dear…">${escapeHTML(state.notes.letter || '')}</textarea><output id="word-count"></output><p class="fine-print">Chỉ đếm từ; chưa tự chấm nội dung hay ngữ pháp.</p></section></aside></div>`;
+}
+function lettersPage() {
+  const letter = window.COURSE.letters[letterIndex];
+  const prompt = photoPages.find(p => p.test === letter.number && p.skill === 'letter');
+  return heading('10 lá thư · bài mẫu gốc.', 'Tách riêng bộ 30 câu viết lại. Chép từ 10 ảnh tài liệu; không tự tạo đề thi cho test chưa có ảnh đề.') + `<div class="toolbar"><label for="letter-select">Chọn lá thư</label><select id="letter-select">${window.COURSE.letters.map((l, i) => `<option value="${i}" ${i === letterIndex ? 'selected' : ''}>Test ${l.number} · ${escapeHTML(l.title)}</option>`).join('')}</select><a class="button secondary" href="#writing">30 câu viết lại</a></div><div class="warning">Mục tiêu luyện: khoảng 120 từ trở lên theo các đoạn dặn trong bản chép recording; chưa xác minh trực tiếp hết âm thanh. Bài mẫu gốc có thể dài hơn. Thay tên và chi tiết cá nhân; không chép phần hướng dẫn trong ngoặc vào bài thi.</div><div class="split"><section class="practice"><h2>Test ${letter.number} · ${escapeHTML(letter.title)}</h2>${prompt ? `<details><summary>Đề lá thư từ ảnh sách</summary><div class="body-text">${escapeHTML(prompt.text)}</div></details>` : '<p class="fine-print">Chưa có ảnh đề Question 7 của test này để đối chiếu. Dưới đây là bài mẫu nguồn, không phải đề bài.</p>'}<p class="fine-print">${(letter.body.match(/\S+/g) || []).length} mục phân tách bằng khoảng trắng, tính cả lời chào, chữ ký và chỗ điền; không phải số từ bài thi đã hoàn thiện.</p><div class="exam-text letter-body" lang="en">${escapeHTML(letter.body)}</div><details><summary>Đối chiếu ảnh bài mẫu gốc</summary><a href="${encodeURI(letter.src)}" target="_blank" rel="noopener"><img class="source-image" src="${encodeURI(letter.src)}" alt="Bài mẫu lá thư Test ${letter.number}"></a>${link(letter.source)}</details></section><aside class="panel"><label for="photo-letter">Bản nháp thư Test ${letter.number} · lưu riêng từng test</label><textarea id="photo-letter" data-note="letter-test-${letter.number}" lang="en" rows="16">${escapeHTML(state.notes[`letter-test-${letter.number}`] || '')}</textarea><output id="photo-letter-count"></output><label class="complete"><input type="checkbox" data-done="letter-${letter.number}" ${state.done[`letter-${letter.number}`] ? 'checked' : ''}> Đã luyện và đối chiếu nguồn</label></aside></div>`;
 }
 function speakingPage() {
   const t = topics[topicIndex];
@@ -82,7 +88,7 @@ function practicePage() {
   }
   return heading('Đọc đề rõ, làm bài dễ hơn.', 'Đề và bài đọc đã chép thành chữ lớn. Ảnh gốc giữ riêng để đối chiếu, không dùng dấu viết tay làm đáp án.') + `<details class="photo-quality"><summary>Ảnh cần chụp lại · ${photoPages.filter((p) => p.quality).length} ảnh</summary>${photoPages.filter((p) => p.quality).map((p) => `<p>${escapeHTML(p.quality)}<br><strong>File: ${escapeHTML(p.original.split('/').pop())}</strong></p>`).join('')}<p>Các trang còn lại đọc được nội dung chính ở ảnh gốc hiện tại; không cần chụp lại toàn bộ. Phần trang bên cạnh bị lọt vào ảnh không được coi là trang đề đầy đủ.</p></details><div class="toolbar"><label for="practice-test">Bộ đề</label><select id="practice-test"><option value="1" ${practiceTest === 1 ? 'selected' : ''}>Test 1</option><option value="2" ${practiceTest === 2 ? 'selected' : ''}>Test 2</option></select><label for="practice-skill">Kỹ năng</label><select id="practice-skill"><option value="reading" ${practiceSkill === 'reading' ? 'selected' : ''}>Đọc hiểu</option><option value="listening" ${practiceSkill === 'listening' ? 'selected' : ''}>Nghe</option><option value="letter" ${practiceSkill === 'letter' ? 'selected' : ''}>Viết thư · Part 3</option></select><a class="button secondary" href="#scope">Học gì / bỏ gì?</a></div>${content}`;
 }
-const pageNames = { home: 'Tổng quan', practice: 'Ôn theo ảnh đề', videos: 'Lớp học video', writing: 'Luyện viết', speaking: 'Luyện nói', library: 'Kho tài liệu', notes: 'Ghi chú của tôi', scope: 'Dặn dò & phạm vi' };
+const pageNames = { home: 'Tổng quan', practice: 'Ôn theo ảnh đề', videos: 'Lớp học video', writing: 'Luyện viết', letters: '10 lá thư', speaking: 'Luyện nói', library: 'Kho tài liệu', notes: 'Ghi chú của tôi', scope: 'Dặn dò & phạm vi' };
 function render() {
   if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   clearInterval(timer);
@@ -91,8 +97,29 @@ function render() {
   document.querySelectorAll('nav a').forEach((a) => { a.classList.toggle('active', a.dataset.view === view); if (a.dataset.view === view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   $('#breadcrumb').textContent = pageNames[view];
   if (view === 'practice' && new URLSearchParams(search).get('skill') === 'listening') practiceSkill = 'listening';
-  const pages = { home, practice: practicePage, videos: videoPage, writing: writingPage, speaking: speakingPage, library: libraryPage, scope: scopePage, notes: notesPage };
+  const pages = { home, practice: practicePage, videos: videoPage, writing: writingPage, letters: lettersPage, speaking: speakingPage, library: libraryPage, scope: scopePage, notes: notesPage };
   $('#main').innerHTML = pages[view]();
+  if (view === 'writing') {
+    const lettersLink = $('#main a[href="#library?skill=thư"]');
+    if (lettersLink) { lettersLink.href = '#letters'; lettersLink.textContent = 'Luyện đủ 10 lá thư'; }
+    const title = [...document.querySelectorAll('#main h3')].find(el => el.textContent.includes('120–150'));
+    if (title) title.textContent = 'Viết thư · mục tiêu khoảng 120 từ trở lên';
+    const count = $('#word-count');
+    if (count) count.textContent = count.textContent.replace('120–150', 'khoảng 120 từ trở lên');
+    if (qNeedsReview(questionIndex + 1)) {
+      const warning = document.createElement('p'); warning.className = 'warning';
+      warning.textContent = 'Câu 10 cần đối chiếu recording “30 CÂU VIẾT”, 44:28–45:40: bản nháp có lời sửa từ/thì trong câu, chưa đủ để kết luận bỏ câu 10. Đáp án PDF vẫn giữ nguyên, không tự sửa khi chưa xác minh âm thanh.';
+      $('#main .practice').prepend(warning);
+    }
+  }
+  if (view === 'videos') {
+    const audit = window.COURSE.recordingAudit?.find(r => r.id === currentVideo);
+    if (audit) {
+      const panel = document.createElement('section'); panel.className = 'panel';
+      panel.innerHTML = `<h3>Trạng thái rà recording này</h3><p>Đã có bản nháp ${audit.segments} đoạn, ${(audit.duration / 60).toFixed(1)} phút. <strong>Chưa xác minh từng lời bằng âm thanh.</strong> Có ${audit.gaps.length} khoảng trống trên 30 giây cần kiểm tra, không mặc định là im lặng.</p><details><summary>${audit.candidates.length} mốc nghi có dặn dò / sửa bài cần nghe lại</summary>${audit.candidates.map(c => { const t = Math.floor(c.start); const stamp = `${Math.floor(t/3600)}:${String(Math.floor(t%3600/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`; return `<p><a href="${sourceURL(audit.id)}?t=${t}" target="_blank" rel="noopener">${stamp} · Mở nguồn</a><br>${escapeHTML(c.context)}</p>`; }).join('')}</details><p class="fine-print">Danh sách tự động chỉ giúp tìm đoạn. Có thể nhận sai hoặc bỏ sót lời; không phải kết luận phạm vi.</p>`;
+      $('#main .video-detail').append(panel);
+    }
+  }
   if (view === 'practice') {
     const page = photoPages.filter((p) => p.test === practiceTest && p.skill === practiceSkill)[photoIndex];
     if (page) {
@@ -148,7 +175,8 @@ function render() {
   if (view === 'practice') updatePhotoWords();
 }
 function updatePhotoWords() { if ($('#photo-letter-count')) $('#photo-letter-count').textContent = `${($('#photo-letter').value.trim().match(/\S+/g) || []).length} từ · thầy hướng dẫn khoảng 120 từ`; }
-function updateWords() { if ($('#word-count')) $('#word-count').textContent = `${($('#letter').value.trim().match(/\S+/g) || []).length} từ · mục tiêu 120–150`; }
+function qNeedsReview(number) { return number === 10; }
+function updateWords() { if ($('#word-count')) $('#word-count').textContent = `${($('#letter').value.trim().match(/\S+/g) || []).length} từ · mục tiêu khoảng 120 từ trở lên`; }
 function setupTimer() {
   let remaining = Number($('#duration').value), running = false;
   const show = () => { $('#timer').textContent = `${String(Math.floor(remaining / 60)).padStart(2, '0')}:${String(remaining % 60).padStart(2, '0')}`; };
@@ -232,6 +260,7 @@ document.addEventListener('change', (e) => {
   if (el.id === 'resource-filter') resources($('#resource-search').value, el.value);
   if (el.id === 'question-select') { questionIndex = Number(el.value); render(); }
   if (el.id === 'topic-select') { topicIndex = Number(el.value); render(); }
+  if (el.id === 'letter-select') { letterIndex = Number(el.value); render(); }
   if (el.id === 'practice-test') { practiceTest = Number(el.value); photoIndex = 0; showKey = false; render(); }
   if (el.id === 'practice-skill') { practiceSkill = el.value; photoIndex = 0; showKey = false; history.replaceState(null, '', '#practice'); render(); }
   if (el.id === 'practice-page') { photoIndex = Number(el.value); showKey = false; render(); }
