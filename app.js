@@ -130,7 +130,7 @@ function render() {
     }
   }
   if (view === 'practice') {
-    const notices = (practiceTest === 8 && practiceSkill === 'listening' ? ['PDF đáp án nguồn thiếu Listening Test 8 Part 3–4 (câu 14–25); ô đáp án hiện “?” thay vì đoán.'] : []);
+    const notices = (practiceTest === 8 && practiceSkill === 'listening' ? ['PDF đáp án thiếu Test 8 Listening Part 3–4. Đáp án hiện tại suy ra từ audio (ASR + cao độ giọng), chưa có key chính thức — đối chiếu lại khi có nguồn.'] : []);
     if (notices.length) {
       const note = document.createElement('p'); note.className = 'warning'; note.textContent = notices.join(' ');
       $('#main .toolbar').after(note);
