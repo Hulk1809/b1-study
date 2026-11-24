@@ -27,11 +27,11 @@ function skill(title, symbol, detail, href, prefix, total, tag) { const count = 
 function home() {
   const done = Object.values(state.done).filter(Boolean).length;
   return heading('Chào bạn, cùng học B1 nhé.', 'Không cần vội. Mỗi bài học là một bước gần hơn đến mục tiêu.', 'GÓC HỌC TIẾNG ANH CỦA BẠN') + `
-  <section class="hero"><div class="hero-copy"><div class="eyebrow">ÔN ĐÚNG PHẦN · GIỮ ĐÚNG NGUỒN</div><h2>Hiểu phạm vi.<br>Ôn tập <em>có trọng tâm.</em></h2><p>Ảnh đề Test 1–10 đã xếp đúng phần; Test 6 thiếu Reading Part 2. Làm bài bên ảnh, đối chiếu đáp án gốc, giữ lại câu cần ôn.</p><a class="button" href="#practice">Ôn theo ảnh đề <span>↗</span></a></div><div class="hero-art" aria-hidden="true"><div class="orbit"></div><div class="book"><small>ENGLISH / STUDY</small><strong>B1</strong><span>one step at a time.</span></div><span class="art-label">Make progress, not perfect.</span><span class="art-star">✳</span></div></section>
+  <section class="hero"><div class="hero-copy"><div class="eyebrow">ÔN ĐÚNG PHẦN · GIỮ ĐÚNG NGUỒN</div><h2>Hiểu phạm vi.<br>Ôn tập <em>có trọng tâm.</em></h2><p>Ảnh đề Test 1–10 đã xếp đúng phần, đủ câu đọc 1–35. Làm bài bên ảnh, đối chiếu đáp án gốc, giữ lại câu cần ôn.</p><a class="button" href="#practice">Ôn theo ảnh đề <span>↗</span></a></div><div class="hero-art" aria-hidden="true"><div class="orbit"></div><div class="book"><small>ENGLISH / STUDY</small><strong>B1</strong><span>one step at a time.</span></div><span class="art-label">Make progress, not perfect.</span><span class="art-star">✳</span></div></section>
   <section class="stats" aria-label="Tổng quan khóa học"><div class="stat"><span class="stat-icon">▷</span><div><strong>${videos.length}</strong><small>Video bài giảng</small></div></div><div class="stat"><span class="stat-icon">▤</span><div><strong>${items.filter((i) => i.local).length}</strong><small>Tài liệu đã tải</small></div></div><div class="stat"><span class="stat-icon">✎</span><div><strong>30</strong><small>Câu luyện viết</small></div></div><div class="stat"><span class="stat-icon">✓</span><div><strong>${done}</strong><small>Mục đã hoàn thành</small></div></div></section>
   <div class="columns"><section><div class="section-title"><h2>Góc luyện kỹ năng</h2><a class="text-link" href="#library">Tất cả tài liệu ↗</a></div><div class="skill-grid">
   ${skill('Listening · Nghe','♬','Test 1–10 có ảnh đề · Audio đúng test/part','practice?skill=listening','listen-',10,'PHẠM VI 10 TESTS')}
-  ${skill('Reading · Đọc','▤','Test 1–5, 7–10 đủ 5 phần đọc · Test 6 thiếu Part 2','practice','read-',10,'ẢNH ĐỀ MỚI')}
+  ${skill('Reading · Đọc','▤','Test 1–10 đủ 5 phần đọc · Câu 1–35','practice','read-',10,'ẢNH ĐỀ MỚI')}
   ${skill('Writing · Viết','✎','30 câu viết lại & 10 bài viết thư','writing','write-',30,'THỰC HÀNH')}
   ${skill('Speaking · Nói','♧','10 chủ đề · Bài mẫu & bấm giờ','speaking','speak-',10,'10 TOPICS')}</div>
   <div class="info-strip"><span class="skill-symbol">▧</span><div><strong>Điều quan trọng trước khi bắt đầu</strong><br><span>Xem dặn dò, phạm vi ôn và cấu trúc bài thi.</span></div><a href="#scope">Đọc dặn dò ↗</a></div></section>
@@ -130,7 +130,7 @@ function render() {
     }
   }
   if (view === 'practice') {
-    const notices = (practiceTest === 6 && practiceSkill === 'reading' ? ['Test 6 thiếu ảnh Reading Part 2 · câu 6–10. Các phần còn lại đã đủ.'] : []).concat(practiceTest === 8 && practiceSkill === 'listening' ? ['PDF đáp án nguồn thiếu Listening Test 8 Part 3–4 (câu 14–25); ô đáp án hiện “?” thay vì đoán.'] : []);
+    const notices = (practiceTest === 8 && practiceSkill === 'listening' ? ['PDF đáp án nguồn thiếu Listening Test 8 Part 3–4 (câu 14–25); ô đáp án hiện “?” thay vì đoán.'] : []);
     if (notices.length) {
       const note = document.createElement('p'); note.className = 'warning'; note.textContent = notices.join(' ');
       $('#main .toolbar').after(note);
