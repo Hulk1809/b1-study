@@ -221,6 +221,29 @@ document.addEventListener('play', (e) => {
   }
 }, true);
 
+function englishVoice() { const voices = window.speechSynthesis.getVoices() || []; return voices.find(v => v.lang === 'en-GB') || voices.find(v => (v.lang || '').toLowerCase().startsWith('en')); }
+function sayEnglish(text) {
+  const synth = window.speechSynthesis;
+  synth.cancel();
+  if (synth.resume) synth.resume();
+  const voice = englishVoice();
+  // ponytail: chunk at sentence length; Chrome/Windows cuts long utterances. Upgrade to SSML if needed.
+  const parts = text.match(/[^.!?]{1,180}[.!?]?/g) || [text];
+  let reported = false;
+  for (const part of parts) {
+    const clean = part.trim();
+    if (!clean) continue;
+    const utterance = new SpeechSynthesisUtterance(clean);
+    utterance.lang = 'en-GB'; utterance.rate = 0.85;
+    if (voice) utterance.voice = voice;
+    utterance.onerror = (e) => {
+      if (reported || ['canceled', 'interrupted'].includes(e.error)) return;
+      reported = true;
+      toast(voice ? `Không phát được giọng đọc (${e.error}). Thử Chrome/Edge và kiểm tra âm lượng.` : 'Máy chưa có giọng tiếng Anh. Windows: Settings → Time & Language → Speech → Add voices; hoặc mở bằng Chrome/Edge.');
+    };
+    synth.speak(utterance);
+  }
+}
 function enhanceExamText(container) {
   const lines = container.textContent.split('\n');
   container.textContent = '';
@@ -241,17 +264,7 @@ function enhanceExamText(container) {
       const speak = document.createElement('button'); speak.type = 'button'; speak.textContent = 'Đọc';
       speak.setAttribute('aria-label', 'Đọc tiếng Anh: ' + line);
       speak.disabled = !('speechSynthesis' in window);
-      speak.onclick = () => {
-        document.querySelectorAll('audio').forEach(audio => audio.pause());
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(line.replace(/^\d+\.\s*|^[A-D]\.\s*/g, ''));
-        utterance.lang = 'en-GB'; utterance.rate = 0.85;
-        const voices = window.speechSynthesis.getVoices();
-        const voice = voices.find(v => v.lang === 'en-GB') || voices.find(v => v.lang.startsWith('en'));
-        if (voice) utterance.voice = voice;
-        utterance.onerror = e => { if (!['canceled', 'interrupted'].includes(e.error)) toast('Không phát được giọng đọc. Kiểm tra âm lượng hoặc thử Chrome/Edge.'); };
-        window.speechSynthesis.speak(utterance);
-      };
+      speak.onclick = () => { document.querySelectorAll('audio').forEach(a => a.pause()); sayEnglish(line.replace(/^\d+\.\s*|^[A-D]\.\s*/g, '')); };
       const translate = document.createElement('button'); translate.type = 'button'; translate.textContent = 'Dịch';
       translate.setAttribute('aria-label', 'Dịch sang tiếng Việt: ' + line);
       translate.setAttribute('aria-expanded', 'false');
@@ -287,8 +300,7 @@ document.addEventListener('click', (e) => {
   if (el.dataset.speakTopic !== undefined) { topicIndex = Number(el.dataset.speakTopic); render(); }
   if (el.id === 'read-topics') {
     if (!('speechSynthesis' in window)) { toast('Trình duyệt này không hỗ trợ đọc bằng giọng thiết bị.'); return; }
-    window.speechSynthesis.cancel();
-    ['What’s something new you want to study or develop?','What television programs are popular in your country?','Do you think you have a balanced diet?','Do you prefer to travel or stay at home during holiday periods? Why?','Do you prefer team sports or individual sports?'].forEach((q) => { const u = new SpeechSynthesisUtterance(q); u.lang = 'en-GB'; u.rate = 0.85; window.speechSynthesis.speak(u); });
+    sayEnglish(["What’s something new you want to study or develop?", "What television programs are popular in your country?", "Do you think you have a balanced diet?", "Do you prefer to travel or stay at home during holiday periods? Why?", "Do you prefer team sports or individual sports?"].join(' '));
   }
   if (el.dataset.photoStep) { photoIndex += Number(el.dataset.photoStep); showKey = false; render(); }
   if (el.id === 'toggle-key') { showKey = !showKey; render(); }
