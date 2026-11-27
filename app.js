@@ -11,6 +11,7 @@ let currentVideo = items.find((i) => i.name.includes('NHẬP KHÓA')).id;
 let questionIndex = 0;
 let topicIndex = 0;
 let letterIndex = 0;
+let frameTest = 1;
 let photoIndex = 0;
 let showKey = false;
 let practiceTest = 1;
@@ -49,6 +50,12 @@ function lettersPage() {
   const letter = window.COURSE.letters[letterIndex];
   const prompt = photoPages.find(p => p.test === letter.number && p.skill === 'letter');
   return heading('10 lá thư · bài mẫu gốc.', 'Tách riêng bộ 30 câu viết lại. Chép từ 10 ảnh tài liệu; không tự tạo đề thi cho test chưa có ảnh đề.') + `<div class="toolbar"><label for="letter-select">Chọn lá thư</label><select id="letter-select">${window.COURSE.letters.map((l, i) => `<option value="${i}" ${i === letterIndex ? 'selected' : ''}>Test ${l.number} · ${escapeHTML(l.title)}</option>`).join('')}</select><a class="button secondary" href="#writing">30 câu viết lại</a></div><div class="warning">Mục tiêu luyện: khoảng 120 từ trở lên theo các đoạn dặn trong bản chép recording; chưa xác minh trực tiếp hết âm thanh. Bài mẫu gốc có thể dài hơn. Thay tên và chi tiết cá nhân; không chép phần hướng dẫn trong ngoặc vào bài thi.</div><details class="photo-quality"><summary>Cách học 1 ngày · 4 khung 12 câu</summary><p>Học đủ 1 khung đại diện, các bài còn lại chỉ thay phần gạch chân. Mục tiêu 120–150 từ, không học thuộc nguyên bài.</p><ol><li>45' khung A + viết Test 4.</li><li>60' Test 1, 2, 6 — mỗi bài 15–20' chỉ thay ruột.</li><li>45' khung B: Test 3 viết, Test 7 thay ruột.</li><li>45' khung C: Test 5 viết 2 lần.</li><li>75' khung D: Test 10 → 9 → 8.</li><li>30' đọc to 4 bài đại diện, soát lỗi: -s, thì, a/an, giới từ, viết hoa.</li></ol>${window.COURSE.letterFrames.map(f => `<details><summary>Khung ${f.id} · ${escapeHTML(f.title)} · Test ${f.tests.join(', ')}</summary><ol>${f.lines.map(l => `<li lang="en">${escapeHTML(l)}</li>`).join('')}</ol></details>`).join('')}</details><div class="split"><section class="practice"><h2>Test ${letter.number} · ${escapeHTML(letter.title)}</h2>${(() => { const plan = window.COURSE.letterPlans[letter.number]; const frame = plan && window.COURSE.letterFrames.find(f => f.id === plan[0]); return plan ? `<details open><summary>Bản 12 câu theo khung ${plan[0]} · bám đề Test ${letter.number}</summary><p class="fine-print">Ví dụ tự viết theo khung, nội dung có thể thay bằng chi tiết của bạn; không phải bài mẫu trong sách.</p><div class="exam-text" lang="en">${escapeHTML(plan[1])}</div>${frame ? `<p class="fine-print">Khung ${frame.id}: ${escapeHTML(frame.title)} — ${frame.lines.filter(l => l.includes('___')).length} chỗ điền.</p>` : ''}</details>` : ''; })()}${prompt ? `<details><summary>Đề lá thư từ ảnh sách</summary><div class="body-text">${escapeHTML(prompt.text)}</div></details>` : '<p class="fine-print">Chưa có ảnh đề Question 7 của test này để đối chiếu. Dưới đây là bài mẫu nguồn, không phải đề bài.</p>'}<p class="fine-print">${(letter.body.match(/\S+/g) || []).length} mục phân tách bằng khoảng trắng, tính cả lời chào, chữ ký và chỗ điền; không phải số từ bài thi đã hoàn thiện.</p><div class="exam-text letter-body" lang="en">${escapeHTML(letter.body)}</div><details><summary>Đối chiếu ảnh bài mẫu gốc</summary><a href="${encodeURI(letter.src)}" target="_blank" rel="noopener"><img class="source-image" src="${encodeURI(letter.src)}" alt="Bài mẫu lá thư Test ${letter.number}"></a>${link(letter.source)}</details></section><aside class="panel"><label for="photo-letter">Bản nháp thư Test ${letter.number} · lưu riêng từng test</label><textarea id="photo-letter" data-note="letter-test-${letter.number}" lang="en" rows="16">${escapeHTML(state.notes[`letter-test-${letter.number}`] || '')}</textarea><output id="photo-letter-count"></output><label class="complete"><input type="checkbox" data-done="letter-${letter.number}" ${state.done[`letter-${letter.number}`] ? 'checked' : ''}> Đã luyện và đối chiếu nguồn</label></aside></div>`;
+}
+function framesPage() {
+  const plan = window.COURSE.letterPlans[frameTest];
+  const frame = window.COURSE.letterFrames.find(f => f.id === plan[0]);
+  const wordCount = (window.COURSE.letters[frameTest - 1].body.match(/\S+/g) || []).length;
+  return heading('Học 4 khung, viết 10 đề.', 'Mỗi khung 12 câu; chỉ thay phần gạch chân theo đề. Bài điền sẵn là ví dụ tự viết, không phải bài mẫu trong sách.') + `<div class="toolbar"><label for="frame-test">Chọn đề</label><select id="frame-test">${Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}" ${frameTest === i + 1 ? 'selected' : ''}>Test ${i + 1} · khung ${window.COURSE.letterPlans[i + 1][0]}</option>`).join('')}</select><a class="button secondary" href="#letters">Ảnh bài mẫu gốc ↗</a></div><div class="split"><section class="practice"><div class="eyebrow">KHUNG ${frame.id} · ${escapeHTML(frame.title)}</div><h3>Khung 12 câu áp cho Test ${frameTest}</h3><div class="exam-text" lang="en">${escapeHTML(frame.lines.join('\n'))}</div><details open><summary>Bài điền sẵn theo đề Test ${frameTest}</summary><p class="fine-print">${plan[1].split(/\s+/).length} từ · ví dụ tự viết, thay bằng chi tiết của bạn. Nguồn đề: ảnh sách Test ${frameTest}.</p><div class="exam-text" lang="en">${escapeHTML(plan[1])}</div></details></section><aside class="panel"><label for="frame-draft">Bài viết của bạn · Test ${frameTest}</label><textarea id="frame-draft" data-note="frame-test-${frameTest}" lang="en" rows="16" placeholder="Dear…">${escapeHTML(state.notes[`frame-test-${frameTest}`] || '')}</textarea><output id="frame-count">${(state.notes[`frame-test-${frameTest}`] || '').trim().split(/\s+/).filter(Boolean).length} từ · mục tiêu 100–120</output><label class="complete"><input type="checkbox" data-done="frame-${frameTest}" ${state.done[`frame-${frameTest}`] ? 'checked' : ''}> Đã viết lại không nhìn mẫu</label><p class="fine-print">Soát 5 lỗi: động từ -s, thì, a/an, giới từ, chữ hoa. Bài lưu riêng từng đề trên máy này.</p></aside></div>`;
 }
 function speakingPage() {
   const t = topics[topicIndex];
@@ -89,7 +96,7 @@ function practicePage() {
   }
   return heading('Đọc đề rõ, làm bài dễ hơn.', 'Đề và bài đọc đã chép thành chữ lớn. Ảnh gốc giữ riêng để đối chiếu, không dùng dấu viết tay làm đáp án.') + `<details class="photo-quality"><summary>Ảnh cần chụp lại · ${photoPages.filter((p) => p.quality).length} ảnh</summary>${photoPages.filter((p) => p.quality).map((p) => `<p>${escapeHTML(p.quality)}<br><strong>File: ${escapeHTML(p.original.split('/').pop())}</strong></p>`).join('')}<p>Các trang còn lại đọc được nội dung chính ở ảnh gốc hiện tại; không cần chụp lại toàn bộ. Phần trang bên cạnh bị lọt vào ảnh không được coi là trang đề đầy đủ.</p></details><div class="toolbar"><label for="practice-test">Bộ đề</label><select id="practice-test"><option value="1" ${practiceTest === 1 ? 'selected' : ''}>Test 1</option><option value="2" ${practiceTest === 2 ? 'selected' : ''}>Test 2</option><option value="3" ${practiceTest === 3 ? 'selected' : ''}>Test 3</option><option value="4" ${practiceTest === 4 ? 'selected' : ''}>Test 4</option><option value="5" ${practiceTest === 5 ? 'selected' : ''}>Test 5</option><option value="6" ${practiceTest === 6 ? 'selected' : ''}>Test 6</option><option value="7" ${practiceTest === 7 ? 'selected' : ''}>Test 7</option><option value="8" ${practiceTest === 8 ? 'selected' : ''}>Test 8</option><option value="9" ${practiceTest === 9 ? 'selected' : ''}>Test 9</option><option value="10" ${practiceTest === 10 ? 'selected' : ''}>Test 10</option></select><label for="practice-skill">Kỹ năng</label><select id="practice-skill"><option value="reading" ${practiceSkill === 'reading' ? 'selected' : ''}>Đọc hiểu</option><option value="listening" ${practiceSkill === 'listening' ? 'selected' : ''}>Nghe</option><option value="letter" ${practiceSkill === 'letter' ? 'selected' : ''}>Viết thư · Part 3</option></select><a class="button secondary" href="#scope">Học gì / bỏ gì?</a></div>${content}`;
 }
-const pageNames = { home: 'Tổng quan', practice: 'Ôn theo ảnh đề', videos: 'Lớp học video', writing: 'Luyện viết', letters: '10 lá thư', speaking: 'Luyện nói', library: 'Kho tài liệu', notes: 'Ghi chú của tôi', scope: 'Dặn dò & phạm vi' };
+const pageNames = { home: 'Tổng quan', practice: 'Ôn theo ảnh đề', videos: 'Lớp học video', writing: 'Luyện viết', letters: '10 lá thư', frames: 'Khung viết thư', speaking: 'Luyện nói', library: 'Kho tài liệu', notes: 'Ghi chú của tôi', scope: 'Dặn dò & phạm vi' };
 function render() {
   if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   clearInterval(timer);
@@ -98,7 +105,7 @@ function render() {
   document.querySelectorAll('nav a').forEach((a) => { a.classList.toggle('active', a.dataset.view === view); if (a.dataset.view === view) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   $('#breadcrumb').textContent = pageNames[view];
   if (view === 'practice' && new URLSearchParams(search).get('skill') === 'listening') practiceSkill = 'listening';
-  const pages = { home, practice: practicePage, videos: videoPage, writing: writingPage, letters: lettersPage, speaking: speakingPage, library: libraryPage, scope: scopePage, notes: notesPage };
+  const pages = { home, practice: practicePage, videos: videoPage, writing: writingPage, letters: lettersPage, frames: framesPage, speaking: speakingPage, library: libraryPage, scope: scopePage, notes: notesPage };
   $('#main').innerHTML = pages[view]();
   if (view === 'writing') {
     const question = questions[questionIndex];
@@ -186,7 +193,7 @@ function render() {
   if (view === 'library') { const query = new URLSearchParams(search).get('skill') || ''; $('#resource-search').value = query; resources(query); }
   if (view === 'writing') updateWords();
   if (view === 'speaking') { setupTimer(); const box = $('#main .exam-text'); if (box) enhanceExamText(box); }
-  if (view === 'letters') { document.querySelectorAll('#main .exam-text').forEach(box => enhanceExamText(box)); }
+  if (view === 'letters' || view === 'frames') { document.querySelectorAll('#main .exam-text').forEach(box => enhanceExamText(box)); }
   if (view === 'practice') updatePhotoWords();
 }
 function updatePhotoWords() { if ($('#photo-letter-count')) $('#photo-letter-count').textContent = `${($('#photo-letter').value.trim().match(/\S+/g) || []).length} từ · thầy hướng dẫn khoảng 120 từ`; }
@@ -212,6 +219,7 @@ document.addEventListener('input', (e) => {
   if (el.dataset.answer) { state.answers[el.dataset.answer] = el.value; save(); }
   if (el.id === 'resource-search') resources(el.value, $('#resource-filter').value);
   if (el.id === 'letter') updateWords();
+  if (el.id === 'frame-draft') $('#frame-count').textContent = `${(el.value.trim().match(/\S+/g) || []).length} từ · mục tiêu 100–120`;
   if (el.dataset.practice) { (state.practice[el.dataset.practice] ||= {})[el.dataset.number] = el.value; save(); }
   if (el.id === 'photo-letter') updatePhotoWords();
 });
@@ -290,6 +298,7 @@ document.addEventListener('change', (e) => {
   if (el.id === 'question-select') { questionIndex = Number(el.value); render(); }
   if (el.id === 'topic-select') { topicIndex = Number(el.value); render(); }
   if (el.id === 'letter-select') { letterIndex = Number(el.value); render(); }
+  if (el.id === 'frame-test') { frameTest = Number(el.value); render(); }
   if (el.id === 'practice-test') { practiceTest = Number(el.value); photoIndex = 0; showKey = false; render(); }
   if (el.id === 'practice-skill') { practiceSkill = el.value; photoIndex = 0; showKey = false; history.replaceState(null, '', '#practice'); render(); }
   if (el.id === 'practice-page') { photoIndex = Number(el.value); showKey = false; render(); }
