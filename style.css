@@ -17,3 +17,8 @@
   .fill-table td { border-top: none; }
   .fill-table td:first-child { border-top: 1px solid var(--line, #d8ddd6); font-weight: 600; }
 }
+
+.fill-list { display: grid; gap: 6px; margin: 10px 0 6px; }
+.fill-row { display: grid; gap: 2px; padding: 8px 10px; border: 1px solid var(--line, #d8ddd6); border-radius: 8px; background: rgba(18, 61, 50, .03); }
+.fill-row strong { font-size: .82rem; letter-spacing: .01em; color: #456; font-weight: 600; }
+.fill-row span { line-height: 1.5; }
